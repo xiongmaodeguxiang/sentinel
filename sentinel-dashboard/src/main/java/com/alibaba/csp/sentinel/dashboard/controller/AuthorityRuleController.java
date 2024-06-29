@@ -205,6 +205,12 @@ public class AuthorityRuleController {
 
     private boolean publishRules(String app, String ip, Integer port) {
         List<AuthorityRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-        return sentinelApiClient.setAuthorityRuleOfMachine(app, ip, port, rules);
+        try {
+            publisher.publish(app, rules);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+//        return sentinelApiClient.setAuthorityRuleOfMachine(app, ip, port, rules);
     }
 }
