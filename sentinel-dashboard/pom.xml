@@ -16,6 +16,7 @@
         <resource.delimiter>@</resource.delimiter>
         <spring.boot.version>2.5.12</spring.boot.version>
         <curator.version>4.0.1</curator.version>
+        <nacos.version>2.3.2</nacos.version>
     </properties>
 
     <dependencies>
@@ -59,7 +60,11 @@
             <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>${nacos.version}</version>
+        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
