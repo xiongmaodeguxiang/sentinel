@@ -24,10 +24,13 @@ import java.util.concurrent.ExecutionException;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthAction;
 import com.alibaba.csp.sentinel.dashboard.client.CommandNotFoundException;
 import com.alibaba.csp.sentinel.dashboard.client.SentinelApiClient;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.SentinelVersion;
@@ -39,6 +42,7 @@ import com.alibaba.csp.sentinel.dashboard.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +69,15 @@ public class ParamFlowRuleController {
     private AppManagement appManagement;
     @Autowired
     private RuleRepository<ParamFlowRuleEntity, Long> repository;
+
+    @Autowired
+    @Qualifier("paramRuleNacosProvider")
+    DynamicRuleProvider<List<ParamFlowRuleEntity>> provider;
+
+    @Autowired
+    @Qualifier("paramRuleNacosPublisher")
+    DynamicRulePublisher<List<ParamFlowRuleEntity>> publisher;
+
 
     private boolean checkIfSupported(String app, String ip, int port) {
         try {
@@ -100,10 +113,13 @@ public class ParamFlowRuleController {
             return unsupportedVersion();
         }
         try {
-            return sentinelApiClient.fetchParamFlowRulesOfMachine(app, ip, port)
-                .thenApply(repository::saveAll)
-                .thenApply(Result::ofSuccess)
-                .get();
+            List<ParamFlowRuleEntity> rules = provider.getRules(app);
+            repository.saveAll(rules);
+            return Result.ofSuccess(rules);
+//            return sentinelApiClient.fetchParamFlowRulesOfMachine(app, ip, port)
+//                .thenApply(repository::saveAll)
+//                .thenApply(Result::ofSuccess)
+//                .get();
         } catch (ExecutionException ex) {
             logger.error("Error when querying parameter flow rules", ex.getCause());
             if (isNotSupported(ex.getCause())) {
@@ -138,16 +154,18 @@ public class ParamFlowRuleController {
         entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
-            publishRules(entity.getApp(), entity.getIp(), entity.getPort()).get();
+            publishRules(entity.getApp(), entity.getIp(), entity.getPort());
             return Result.ofSuccess(entity);
-        } catch (ExecutionException ex) {
-            logger.error("Error when adding new parameter flow rules", ex.getCause());
-            if (isNotSupported(ex.getCause())) {
-                return unsupportedVersion();
-            } else {
-                return Result.ofThrowable(-1, ex.getCause());
-            }
-        } catch (Throwable throwable) {
+        }
+//        catch (ExecutionException ex) {
+//            logger.error("Error when adding new parameter flow rules", ex.getCause());
+//            if (isNotSupported(ex.getCause())) {
+//                return unsupportedVersion();
+//            } else {
+//                return Result.ofThrowable(-1, ex.getCause());
+//            }
+//        }
+        catch (Throwable throwable) {
             logger.error("Error when adding new parameter flow rules", throwable);
             return Result.ofFail(-1, throwable.getMessage());
         }
@@ -215,16 +233,18 @@ public class ParamFlowRuleController {
         entity.setGmtModified(date);
         try {
             entity = repository.save(entity);
-            publishRules(entity.getApp(), entity.getIp(), entity.getPort()).get();
+            publishRules(entity.getApp(), entity.getIp(), entity.getPort());
             return Result.ofSuccess(entity);
-        } catch (ExecutionException ex) {
-            logger.error("Error when updating parameter flow rules, id=" + id, ex.getCause());
-            if (isNotSupported(ex.getCause())) {
-                return unsupportedVersion();
-            } else {
-                return Result.ofThrowable(-1, ex.getCause());
-            }
-        } catch (Throwable throwable) {
+        }
+//        catch (ExecutionException ex) {
+//            logger.error("Error when updating parameter flow rules, id=" + id, ex.getCause());
+//            if (isNotSupported(ex.getCause())) {
+//                return unsupportedVersion();
+//            } else {
+//                return Result.ofThrowable(-1, ex.getCause());
+//            }
+//        }
+        catch (Throwable throwable) {
             logger.error("Error when updating parameter flow rules, id=" + id, throwable);
             return Result.ofFail(-1, throwable.getMessage());
         }
@@ -243,24 +263,30 @@ public class ParamFlowRuleController {
 
         try {
             repository.delete(id);
-            publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort()).get();
+            publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort());
             return Result.ofSuccess(id);
-        } catch (ExecutionException ex) {
-            logger.error("Error when deleting parameter flow rules", ex.getCause());
-            if (isNotSupported(ex.getCause())) {
-                return unsupportedVersion();
-            } else {
-                return Result.ofThrowable(-1, ex.getCause());
-            }
-        } catch (Throwable throwable) {
+        }
+//        catch (ExecutionException ex) {
+//            logger.error("Error when deleting parameter flow rules", ex.getCause());
+//            if (isNotSupported(ex.getCause())) {
+//                return unsupportedVersion();
+//            } else {
+//                return Result.ofThrowable(-1, ex.getCause());
+//            }
+//        }
+        catch (Throwable throwable) {
             logger.error("Error when deleting parameter flow rules", throwable);
             return Result.ofFail(-1, throwable.getMessage());
         }
     }
 
-    private CompletableFuture<Void> publishRules(String app, String ip, Integer port) {
+    private void publishRules(String app, String ip, Integer port) {
         List<ParamFlowRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-        return sentinelApiClient.setParamFlowRuleOfMachine(app, ip, port, rules);
+        try {
+            publisher.publish(app,rules);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private <R> Result<R> unsupportedVersion() {

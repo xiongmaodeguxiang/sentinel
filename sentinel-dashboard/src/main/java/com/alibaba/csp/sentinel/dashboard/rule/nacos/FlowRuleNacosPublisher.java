@@ -21,6 +21,7 @@ import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 import com.alibaba.nacos.api.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class FlowRuleNacosPublisher implements DynamicRulePublisher<List<FlowRul
     @Autowired
     private ConfigService configService;
     @Autowired
+    @Qualifier("flowRuleEntityEncoder")
     private Converter<List<FlowRuleEntity>, String> converter;
 
     @Override

@@ -15,7 +15,8 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.nacos;
 
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.AuthorityRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.util.StringUtil;
@@ -31,18 +32,19 @@ import java.util.List;
  * @author Eric Zhao
  * @since 1.4.0
  */
-@Component("flowRuleNacosProvider")
-public class FlowRuleNacosProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
+@Component("authRuleNacosProvider")
+public class AuthRuleNacosProvider implements DynamicRuleProvider<List<AuthorityRuleEntity>> {
 
     @Autowired
     private ConfigService configService;
+
     @Autowired
-    @Qualifier("flowRuleEntityDecoder")
-    private Converter<String, List<FlowRuleEntity>> converter;
+    @Qualifier(value = "authRuleEntityDecoder")
+    private Converter<String, List<AuthorityRuleEntity>> converter;
 
     @Override
-    public List<FlowRuleEntity> getRules(String appName) throws Exception {
-        String rules = configService.getConfig(appName + NacosConfigUtil.FLOW_DATA_ID_POSTFIX,
+    public List<AuthorityRuleEntity> getRules(String appName) throws Exception {
+        String rules = configService.getConfig(appName + NacosConfigUtil.AUTH_RULE_DATA_ID_POSTFIX,
             NacosConfigUtil.GROUP_ID, 3000);
         if (StringUtil.isEmpty(rules)) {
             return new ArrayList<>();

@@ -20,9 +20,12 @@ import java.util.List;
 
 import com.alibaba.csp.sentinel.dashboard.auth.AuthAction;
 import com.alibaba.csp.sentinel.dashboard.client.SentinelApiClient;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
@@ -33,6 +36,7 @@ import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +63,14 @@ public class AuthorityRuleController {
     private RuleRepository<AuthorityRuleEntity, Long> repository;
     @Autowired
     private AppManagement appManagement;
+
+    @Autowired
+    @Qualifier("authRuleNacosProvider")
+    DynamicRuleProvider<List<AuthorityRuleEntity>> provider;
+
+    @Autowired
+    @Qualifier("authRuleNacosPublisher")
+    DynamicRulePublisher<List<AuthorityRuleEntity>> publisher;
 
     @GetMapping("/rules")
     @AuthAction(PrivilegeType.READ_RULE)
