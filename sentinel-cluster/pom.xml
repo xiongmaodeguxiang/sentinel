@@ -18,7 +18,9 @@
 
     <modules>
         <module>sentinel-cluster-client-default</module>
+        <module>sentinel-cluster-client-nacos-init</module>
         <module>sentinel-cluster-server-default</module>
+        <module>sentinel-cluster-server-nacos-init</module>
         <module>sentinel-cluster-common-default</module>
         <module>sentinel-cluster-server-envoy-rls</module>
     </modules>

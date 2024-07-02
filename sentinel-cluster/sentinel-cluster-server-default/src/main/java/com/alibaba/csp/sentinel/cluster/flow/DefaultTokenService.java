@@ -28,7 +28,8 @@ import java.util.Collection;
 
 /**
  * Default implementation for cluster {@link TokenService}.
- *
+ * 作为服务端请求tokens时执行的方法
+ * 客户端请求token --> 服务端接收请求 --> 调用该方法的requestToken方法
  * @author Eric Zhao
  * @since 1.4.0
  */
