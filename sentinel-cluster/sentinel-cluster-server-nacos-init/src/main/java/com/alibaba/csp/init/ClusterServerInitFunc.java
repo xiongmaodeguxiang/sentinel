@@ -57,7 +57,8 @@ public class ClusterServerInitFunc implements InitFunc {
         initClusterParamFlowSupplier();
         registerServerTransPortConfigListener();
         registerNameSpaceSetListener();
-        initState();
+        //防止将独立启动的server修改为embedded类型
+//        initState();
     }
     /**
      * 初始化集群限流的Supplier
