@@ -79,6 +79,8 @@
 
         <module>sentinel-demo</module>
         <module>sentinel-benchmark</module>
+        <module>sentinel-cluster/sentinel-cluster-client-nacos-init</module>
+        <module>sentinel-cluster/sentinel-cluster-server-nacos-init</module>
 
     </modules>
 

@@ -34,7 +34,7 @@ public class FetchClusterModeCommandHandler implements CommandHandler<String> {
     @Override
     public CommandResponse<String> handle(CommandRequest request) {
         JSONObject res = new JSONObject()
-            .fluentPut("mode", ClusterStateManager.getMode())
+            .fluentPut("mode", ClusterStateManager.getMode())//服务模式：客户端还是服务端，还是未启动
             .fluentPut("lastModified", ClusterStateManager.getLastModified())
             .fluentPut("clientAvailable", isClusterClientSpiAvailable())
             .fluentPut("serverAvailable", isClusterServerSpiAvailable());

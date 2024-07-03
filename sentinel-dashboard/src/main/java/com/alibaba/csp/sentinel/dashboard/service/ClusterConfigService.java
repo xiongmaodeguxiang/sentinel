@@ -104,7 +104,7 @@ public class ClusterConfigService {
         if (StringUtil.isBlank(app)) {
             return AsyncUtils.newFailedFuture(new IllegalArgumentException("app cannot be empty"));
         }
-        AppInfo appInfo = appManagement.getDetailApp(app);
+        AppInfo appInfo = appManagement.getDetailApp(app);//主要用来获取appx信息，该app包含了哪些机器
         if (appInfo == null || appInfo.getMachines() == null) {
             return CompletableFuture.completedFuture(new ArrayList<>());
         }
@@ -150,6 +150,7 @@ public class ClusterConfigService {
             .thenApply(e -> new ClusterUniversalStateVO().setStateInfo(e))
             .thenCompose(vo -> {
                 if (vo.getStateInfo().getClientAvailable()) {
+                    //读取客户端的配置信息，包括客户端指定的serverIp，serverPort，客户端请求的超时时间
                     return sentinelApiClient.fetchClusterClientInfoAndConfig(ip, port)
                         .thenApply(cc -> vo.setClient(new ClusterClientStateVO().setClientConfig(cc)));
                 } else {
