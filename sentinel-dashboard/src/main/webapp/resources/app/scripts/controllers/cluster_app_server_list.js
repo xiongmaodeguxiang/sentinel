@@ -57,6 +57,8 @@ app.controller('SentinelClusterAppServerListController', ['$scope', '$stateParam
             if (data.state.server && data.state.server.namespaceSet) {
                 data.state.server.namespaceSetStr = convertSetToString(data.state.server.namespaceSet);
                 data.mode = data.state.stateInfo.mode;
+            }else if(data.state.stateInfo){
+                data.mode = data.state.stateInfo.mode
             }
         }
 
