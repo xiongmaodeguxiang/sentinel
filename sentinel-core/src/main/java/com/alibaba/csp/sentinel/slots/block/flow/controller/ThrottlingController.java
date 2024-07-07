@@ -51,11 +51,15 @@ public class ThrottlingController implements TrafficShapingController {
         AssertUtil.assertTrue(statDurationMs > 0, "statDurationMs should be positive");
         AssertUtil.assertTrue(maxCountPerStat >= 0, "maxCountPerStat should be >= 0");
         AssertUtil.assertTrue(queueingTimeoutMs >= 0, "queueingTimeoutMs should be >= 0");
+        //排队等待的超时时间
         this.maxQueueingTimeMs = queueingTimeoutMs;
+        //规则设置的qps
         this.count = maxCountPerStat;
+        //1000ms
         this.statDurationMs = statDurationMs;
         // Use nanoSeconds when durationMs%count != 0 or count/durationMs> 1 (to be accurate)
         if (maxCountPerStat > 0) {
+            //qps大于1000时使用Nano时间
             this.useNanoSeconds = statDurationMs % Math.round(maxCountPerStat) != 0 || maxCountPerStat / statDurationMs > 1;
         } else {
             this.useNanoSeconds = false;
@@ -105,6 +109,7 @@ public class ThrottlingController implements TrafficShapingController {
     private boolean checkPassUsingCachedMs(int acquireCount, double maxCountPerStat) {
         long currentTime = TimeUtil.currentTimeMillis();
         // Calculate the interval between every two requests.
+        //statDurationMs=1000ms maxCountPerStat=规则设置的最大qps
         long costTime = Math.round(1.0d * statDurationMs * acquireCount / maxCountPerStat);
 
         // Expected pass time of this request.

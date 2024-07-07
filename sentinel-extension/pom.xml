@@ -26,6 +26,7 @@
         <module>sentinel-annotation-cdi-interceptor</module>
         <module>sentinel-metric-exporter</module>
         <module>sentinel-prometheus-metric-exporter</module>
+        <module>sentinel-datasource-nacos-client</module>
     </modules>
 
 </project>
