@@ -27,7 +27,6 @@
         <dependency>
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-parameter-flow-control</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
